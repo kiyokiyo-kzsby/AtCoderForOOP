@@ -9,22 +9,23 @@ import java.util.Scanner;
 public class Main {
 
 	public static void main(String[] args) {
-		Solver.getInstance().solve();
+		Solver.getInstance(new BallStorageImpl(), new Operator(new AnswerSheetImpl())).solve();
 	}
 	
 	static class Solver {
-		private static Solver solver = new Solver();
+		private static Solver solver;
 		
-		public static Solver getInstance() {
+		public static Solver getInstance(BallStorage ballStorage, Operator operator) {
+			if(solver==null) solver = new Solver(ballStorage,operator);
 			return solver;
 		}
 		
-		private BallStorage ballStorage;
-		private Operator operator;
+		private final BallStorage ballStorage;
+		private final Operator operator;
 		
-		public Solver() {
-			this.ballStorage = new BallStorageImpl();
-			this.operator = new Operator();
+		public Solver(BallStorage ballStorage, Operator operator) {
+			this.ballStorage = ballStorage;
+			this.operator = operator;
 		}
 		
 		public void solve() {
@@ -45,14 +46,14 @@ public class Main {
 		public BallStorageImpl() {
 			Scanner sc = new Scanner(System.in);
 			int numOfBalls = sc.nextInt();
-			this.balls = new ArrayList<>();
+			balls = new ArrayList<>();
 			for(int index=1;index<=numOfBalls;index++) balls.add(new Ball(sc.nextInt()));
 			sc.close();
 		}
 		
 		@Override
 		public List<Ball> getBalls() {
-			return this.balls;
+			return balls;
 		}
 	}
 	
@@ -65,7 +66,7 @@ public class Main {
 		private List<Long> answers;
 		
 		public AnswerSheetImpl() {
-			this.answers = new ArrayList<>();
+			answers = new ArrayList<>();
 		}
 		
 		@Override
@@ -83,12 +84,12 @@ public class Main {
 	static class Operator {
 		private Map<Integer,BallBox> ballBoxes;
 		private long sumOfCombinationOfAllBalls;
-		private AnswerSheet answerSheet;
+		private final AnswerSheet answerSheet;
 		
-		public Operator() {
-			this.ballBoxes = new HashMap<>();
-			this.sumOfCombinationOfAllBalls = 0;
-			this.answerSheet = new AnswerSheetImpl();
+		public Operator(AnswerSheet answerSheet) {
+			ballBoxes = new HashMap<>();
+			sumOfCombinationOfAllBalls = 0;
+			this.answerSheet = answerSheet;
 		}
 		
 		public void arrange(List<Ball> balls) {
@@ -97,7 +98,7 @@ public class Main {
 				else ballBoxes.put(ball.getNumber(), BallBox.getNewBox(ball));
 			}
 			for(BallBox ballBox : ballBoxes.values()) {
-				this.sumOfCombinationOfAllBalls += ballBox.getCombinationOfAllBalls();
+				sumOfCombinationOfAllBalls += ballBox.getCombinationOfAllBalls();
 			}
 		}
 		
@@ -127,10 +128,10 @@ public class Main {
 		private long combinationOfMinusOneBalls;
 		
 		public BallBox() {
-			this.balls = new ArrayList<>();
-			this.isCalculated = false;
-			this.combinationOfAllBalls = 0;
-			this.combinationOfMinusOneBalls = 0;
+			balls = new ArrayList<>();
+			isCalculated = false;
+			combinationOfAllBalls = 0;
+			combinationOfMinusOneBalls = 0;
 		}
 		
 		public void add(Ball ball) {
@@ -166,7 +167,7 @@ public class Main {
 		}
 		
 		public int getNumber() {
-			return this.number;
+			return number;
 		}
 		
 	}
