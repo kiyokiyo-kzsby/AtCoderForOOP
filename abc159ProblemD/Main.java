@@ -45,18 +45,16 @@ public class Main {
 	}
 	
 	static class BallStorageImpl implements BallStorage {
-		private List<Ball> balls;
 		
-		public BallStorageImpl() {
-			Scanner sc = new Scanner(System.in);
-			int numOfBalls = sc.nextInt();
-			balls = new ArrayList<>();
-			for(int index=1;index<=numOfBalls;index++) balls.add(new Ball(index,sc.nextInt()));
-			sc.close();
-		}
+		public BallStorageImpl() {}
 		
 		@Override
 		public List<Ball> getBalls() {
+			Scanner sc = new Scanner(System.in);
+			int numOfBalls = sc.nextInt();
+			List<Ball> balls = new ArrayList<>();
+			for(int index=1;index<=numOfBalls;index++) balls.add(new Ball(index,sc.nextInt()));
+			sc.close();
 			return balls;
 		}
 	}
