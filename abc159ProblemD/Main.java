@@ -9,35 +9,39 @@ import java.util.Scanner;
 public class Main {
 
 	public static void main(String[] args) {
-		Solver.getInstance(new BallStorageImpl(), new Operator(new AnswerSheetImpl())).solve();
+		Solver.getInstance(new BallStorageImpl(), new Operator(),new AnswerSheetImpl()).solve();
 	}
 	
 	static class Solver {
 		private static Solver solver;
 		
-		public static Solver getInstance(BallStorage ballStorage, Operator operator) {
-			if(solver==null) solver = new Solver(ballStorage,operator);
+		public static Solver getInstance(BallStorage ballStorage, Operator operator, AnswerSheet answerSheet) {
+			if(solver==null) solver = new Solver(ballStorage,operator,answerSheet);
 			return solver;
 		}
 		
 		private final BallStorage ballStorage;
 		private final Operator operator;
+		private final AnswerSheet answerSheet;
 		
-		public Solver(BallStorage ballStorage, Operator operator) {
+		public Solver(BallStorage ballStorage, Operator operator,AnswerSheet answerSheet) {
 			this.ballStorage = ballStorage;
 			this.operator = operator;
+			this.answerSheet = answerSheet;
 		}
 		
 		public void solve() {
 			List<Ball> balls = ballStorage.getBalls();
-			operator.arrange(balls);
-			for(Ball ball : balls) operator.calcCombinationWithout(ball);
-			operator.submitAnswer();
+			operator.prepareForCalc(balls);
+			for(Ball ball : balls) {
+				answerSheet.writeDown(operator.calcCombinationWithout(ball));
+			}
+			answerSheet.submit();
 		}
 	}
 	
 	static interface BallStorage {
-		public List<Ball> getBalls();
+		List<Ball> getBalls();
 	}
 	
 	static class BallStorageImpl implements BallStorage {
@@ -58,8 +62,8 @@ public class Main {
 	}
 	
 	static interface AnswerSheet {
-		public void writeDown(long answer);
-		public void submit();
+		void writeDown(long answer);
+		void submit();
 	}
 	
 	static class AnswerSheetImpl implements AnswerSheet{
@@ -84,15 +88,13 @@ public class Main {
 	static class Operator {
 		private Map<Integer,BallBox> ballBoxes;
 		private long sumOfCombinationOfAllBalls;
-		private final AnswerSheet answerSheet;
 		
-		public Operator(AnswerSheet answerSheet) {
+		public Operator() {
 			ballBoxes = new HashMap<>();
 			sumOfCombinationOfAllBalls = 0;
-			this.answerSheet = answerSheet;
 		}
 		
-		public void arrange(List<Ball> balls) {
+		public void prepareForCalc(List<Ball> balls) {
 			for(Ball ball : balls) {
 				if(ballBoxes.containsKey(ball.getNumber())) ballBoxes.get(ball.getNumber()).add(ball);
 				else ballBoxes.put(ball.getNumber(), BallBox.getNewBox(ball));
@@ -102,16 +104,12 @@ public class Main {
 			}
 		}
 		
-		public void calcCombinationWithout(Ball ball) {
-			long combinationWithoutSpecificBall = sumOfCombinationOfAllBalls 
+		public long calcCombinationWithout(Ball ball) {
+			return sumOfCombinationOfAllBalls 
 					- ballBoxes.get(ball.getNumber()).getCombinationOfAllBalls()
 					+ ballBoxes.get(ball.getNumber()).getCombinationOfMinusOneBalls();
-			answerSheet.writeDown(combinationWithoutSpecificBall);
 		}
-		
-		public void submitAnswer() {
-			answerSheet.submit();
-		}
+
 	}
 	
 	
