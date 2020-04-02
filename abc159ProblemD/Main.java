@@ -9,7 +9,7 @@ import java.util.Scanner;
 public class Main {
 
 	public static void main(String[] args) {
-		Solver.getInstance(new BallStorageImpl(), new Operator(),new AnswerSheetImpl()).solve();
+		Solver.getInstance(new BallStorageImpl(), new GeniusOperator(),new AnswerSheetImpl()).solve();
 	}
 	
 	static class Solver {
@@ -85,25 +85,32 @@ public class Main {
 		
 	}
 	
-	static class Operator {
+	static interface Operator {
+		void prepareForCalc(List<Ball> balls);
+		long calcCombinationWithout(Ball ball);
+	}
+	
+	static class GeniusOperator implements Operator{
 		private Map<Integer,BallBox> ballBoxes;
 		private long sumOfCombinationOfAllBalls;
 		
-		public Operator() {
+		public GeniusOperator() {
 			ballBoxes = new HashMap<>();
 			sumOfCombinationOfAllBalls = 0;
 		}
 		
+		@Override
 		public void prepareForCalc(List<Ball> balls) {
 			for(Ball ball : balls) {
 				if(ballBoxes.containsKey(ball.getNumber())) ballBoxes.get(ball.getNumber()).add(ball);
-				else ballBoxes.put(ball.getNumber(), BallBox.getNewBox(ball));
+				else ballBoxes.put(ball.getNumber(), BallBox.createNewBoxWith(ball));
 			}
 			for(BallBox ballBox : ballBoxes.values()) {
 				sumOfCombinationOfAllBalls += ballBox.getCombinationOfAllBalls();
 			}
 		}
 		
+		@Override
 		public long calcCombinationWithout(Ball ball) {
 			return sumOfCombinationOfAllBalls 
 					- ballBoxes.get(ball.getNumber()).getCombinationOfAllBalls()
@@ -114,7 +121,7 @@ public class Main {
 	
 	
 	static class BallBox {
-		static public BallBox getNewBox(Ball ball) {
+		static public BallBox createNewBoxWith(Ball ball) {
 			BallBox box = new BallBox();
 			box.add(ball);
 			return box;
