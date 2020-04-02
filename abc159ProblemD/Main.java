@@ -51,7 +51,7 @@ public class Main {
 			Scanner sc = new Scanner(System.in);
 			int numOfBalls = sc.nextInt();
 			balls = new ArrayList<>();
-			for(int index=1;index<=numOfBalls;index++) balls.add(new Ball(sc.nextInt()));
+			for(int index=1;index<=numOfBalls;index++) balls.add(new Ball(index,sc.nextInt()));
 			sc.close();
 		}
 		
@@ -165,14 +165,32 @@ public class Main {
 	}
 	
 	static class Ball {
+		private int id;
 		private int number;
 		
-		public Ball(int number) {
+		public Ball(int id,int number) {
+			this.id = id;
 			this.number = number;
 		}
 		
 		public int getNumber() {
 			return number;
+		}
+		
+		public int getId() {
+			return id;
+		}
+		
+		@Override
+		public boolean equals(Object otherObject) {
+			if(!(otherObject instanceof Ball)) return false;
+			Ball otherBall = (Ball)otherObject;
+			return id == otherBall.getId();
+		}
+		
+		@Override
+		public int hashCode() {
+			return id;
 		}
 		
 	}
