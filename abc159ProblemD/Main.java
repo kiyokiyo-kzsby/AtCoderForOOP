@@ -31,10 +31,9 @@ public class Main {
 		}
 		
 		public void solve() {
-			List<Ball> balls = ballStorage.getBalls();
-			operator.prepareForCalc(balls);
-			for(Ball ball : balls) {
-				answerSheet.writeDown(operator.calcCombinationWithout(ball));
+			operator.obtain(ballStorage.getBalls());
+			while(operator.hasNextBall()) {
+				answerSheet.writeDown(operator.calcNextAnswer());
 			}
 			answerSheet.submit();
 		}
@@ -79,26 +78,31 @@ public class Main {
 		@Override
 		public void submit() {
 			for(long answer : answers) System.out.println(answer);
-		}
-		
+		}	
 	}
 	
 	static interface Operator {
-		void prepareForCalc(List<Ball> balls);
-		long calcCombinationWithout(Ball ball);
+		void obtain(List<Ball> balls);
+		boolean hasNextBall();
+		long calcNextAnswer();
 	}
 	
 	static class GeniusOperator implements Operator{
+		private List<Ball> balls;
+		private int ballIndex;
 		private Map<Integer,BallBox> ballBoxes;
 		private long sumOfCombinationOfAllBalls;
 		
 		public GeniusOperator() {
+			balls = new ArrayList<>();
+			ballIndex = 0;
 			ballBoxes = new HashMap<>();
 			sumOfCombinationOfAllBalls = 0;
 		}
 		
 		@Override
-		public void prepareForCalc(List<Ball> balls) {
+		public void obtain(List<Ball> balls) {
+			this.balls = balls;
 			for(Ball ball : balls) {
 				if(ballBoxes.containsKey(ball.getNumber())) ballBoxes.get(ball.getNumber()).add(ball);
 				else ballBoxes.put(ball.getNumber(), BallBox.createNewBoxWith(ball));
@@ -109,14 +113,18 @@ public class Main {
 		}
 		
 		@Override
-		public long calcCombinationWithout(Ball ball) {
+		public boolean hasNextBall() {
+			return ballIndex < balls.size();
+		}
+		
+		@Override
+		public long calcNextAnswer() {
+			Ball ball = balls.get(ballIndex++);
 			return sumOfCombinationOfAllBalls 
 					- ballBoxes.get(ball.getNumber()).getCombinationOfAllBalls()
 					+ ballBoxes.get(ball.getNumber()).getCombinationOfMinusOneBalls();
 		}
-
 	}
-	
 	
 	static class BallBox {
 		static public BallBox createNewBoxWith(Ball ball) {
@@ -189,8 +197,7 @@ public class Main {
 		@Override
 		public int hashCode() {
 			return id;
-		}
-		
+		}	
 	}
 	
 	static class CalcUtil {
